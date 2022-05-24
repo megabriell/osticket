@@ -1,0 +1,39 @@
+/*!
+ * Ing Manuel Gabriel (WelMaster)
+ * Implementacion de estilos adicionales
+ *
+ *
+ * @author Manuel Gabriel <ingmanuelgabriel@gmail.com|ingmanuelgabriel@hotmail.com>
+ * @copyright Copyright (c) 2020, Manuel Gabriel | WELMASTER
+ *
+ * Date: 2020-10-20
+*/
+
+.navbar-nav .nav-item.active
+{
+	border-bottom:4px solid #ed1b24;
+	margin-bottom: -8px;
+}
+
+.navbar-collapse.show .navbar-nav .nav-item.active
+{
+	border-bottom:0px;
+	border-left:4px solid #ed1b24;
+	padding-left: 5px;
+}
+
+.hidden{
+	display: none;
+}
+
+.os-padding { z-index: auto!important; }
+
+/*CSS SELECT2*/
+.select2-container--default .select2-selection--multiple .select2-selection__choice{
+    background-color:#606060 !important;
+}
+
+/*last */
+table.dataTable > tbody > tr.child ul.dtr-details > li:last-child{
+	display: flex !important;
+}
