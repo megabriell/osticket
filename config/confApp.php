@@ -14,7 +14,7 @@ $config['date'] = [
 $config['mail'] = [
 	'host'=>'smtp.office365.com',
 	'user'=>'mgabriel@grupodelta.com.gt',
-	'pass'=>'ajajjaja',
+	'pass'=>'jajaja',
 	'port'=>587
 ];
 

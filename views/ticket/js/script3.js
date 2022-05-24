@@ -33,8 +33,8 @@ $('#frmAnswer').bootstrapValidator({
             processData: false,
             contentType: false,
             success: function(data){
-                $('#btnsbm').btnload('reset');
 				data;
+				$('#btnsbm').btnload('reset');
             }
         });
     });

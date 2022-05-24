@@ -91,9 +91,11 @@ update = function (id) {
     })
 },
 
-take = function (id) {
+take = function (id,btn) {
+	btn.btnload('loading');
 	$.post("./controllers/ticket_controller",{take:'',id:id}).done(function(result){
 		result;
+		btn.btnload('reset');
 	});
 },
 
@@ -131,13 +133,17 @@ answer = function (id) {
 				}
 				$.getScript("./views/ticket/js/script3.js");//Script for validate fields
 				$('#T_close').click(function() {
+					$(this).btnload('loading');
 					$.post("./controllers/ticket_controller",{tClosed:'',id:id}).done(function(result){
 						result;
+						$(this).btnload('reset');
 					});
 				});
 				$('#T_ropen').click(function() {
+					$(this).btnload('loading');
 					$.post("./controllers/ticket_controller",{tROpen:'',id:id}).done(function(result){
 						result;
+						$(this).btnload('reset');
 					});
 				});
             })

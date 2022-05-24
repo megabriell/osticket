@@ -62,10 +62,10 @@
 				
 	            
 				if($sessionUser['rol'] == 1){//Si es admin muestra el boton de editar
-					$btnEdit .= '<button type="button" class="btn btn-outline-warning btn-sm" title="Actualizar regsitro" onclick="update(\''.$id.'\',false)"> <i class="fas fa-edit"></i> Actualizar</button>';
+					$btnEdit .= '<button type="button" class="btn btn-outline-warning btn-sm" title="Actualizar regsitro" onclick="update(\''.$id.'\')"> <i class="fas fa-edit"></i> Actualizar</button>';
 				}
 				if($sessionUser['rol'] == 1 && empty($row->Usuario2Id)){//Si no se ha asignado y es admin
-					$btnEdit .= '<button type="button" class="btn btn-outline-secondary btn-sm" title="Asignarme el ticket" onclick="take(\''.$id.'\',false)"> <i class="fas fa-edit"></i> Tomar Ticket</button>';
+					$btnEdit .= '<button type="button" class="btn btn-outline-secondary btn-sm" title="Asignarme el ticket" onclick="take(\''.$id.'\',$(this))" id="'.$id.'"> <i class="fas fa-edit"></i> Tomar Ticket</button>';
 				}
 	            
 				foreach ( $user as $names ){
@@ -175,11 +175,15 @@
 		header('Content-Type: application/javascript');
 		$_POST['id'] = encode('decrypt',$_POST['id']);
 		$_POST['user'] = $sessionUser['iduser'];
+		$msgEmail = '';
 		
 		if( $ticket->validDataAs($_POST) ){
-			$row = $ticket->getTicketById($_POST['id']);
-			$ticket->sendMail($row->TicketTitulo,NULL,$row->UsuarioId,'Le notificamos que su ticket ha sido asignado a '.$inf_user['name'].'. En breve, recibira mas informacion e indicaciones.');
 			$contentMessage = 'Se ha asignado el ticket correctamente';
+			$row = $ticket->getTicketById($_POST['id']);
+			$msgEmail = 'Le notificamos que su ticket #'.$row->TicketId.' ha sido asignado a '.$inf_user['name'].'. En breve, recibira mas informacion e indicaciones.';
+			
+			$ticket->sendMail($row->TicketTitulo,NULL,$row->UsuarioId,$msgEmail);
+			
 			if (!empty($ticket->message)) $contentMessage = $ticket->message;
 			$typeMessage = $ticket->type;
 		}else{
@@ -211,9 +215,20 @@
 		header('Content-Type: application/javascript');
 		$_POST['id'] = encode('decrypt',$_POST['id']);
 		$_POST['user'] = $sessionUser['iduser'];
+		$msgEmail = '';
 		
 		if( $ticket->Closed($_POST) ){
 			$contentMessage = 'Se ha cerrado el ticket correctamente';
+			
+			$row = $ticket->getTicketById($_POST['id']);//Detalle de ticket
+			$user = $ticket->getUsers();//Listado de usuario
+			foreach ( $user as $names ){//Recorrido de usuarios
+				$asigned = ($row->UsuarioId == $names->UsuarioId)?'Estimado/a '.$names->UsuarioNombre.',':'';
+			}
+			$msgEmail = 'Le notificamos que su ticket #'.$row->TicketId.' ha dado por resuelto.';
+			
+			$ticket->sendMail($row->TicketTitulo,$asigned,$row->UsuarioId,$msgEmail);
+			
 			if (!empty($ticket->message)) $contentMessage = $ticket->message;
 			$typeMessage = $ticket->type;
 		}else{
@@ -234,7 +249,9 @@
 			typeAnimated: true,
 			buttons: {
 				Ok: function(){
-					$('#dataTable0').DataTable().ajax.reload(null,false);
+					$.get('./views/home/home', function(content){
+						$('#contentBody').html(content);
+					});
 				}
 			}
 		});";
@@ -248,6 +265,15 @@
 		
 		if( $ticket->ROpen($_POST) ){
 			$contentMessage = 'El ticket se ha abierto nuevamente';
+			$row = $ticket->getTicketById($_POST['id']);
+			$user = $ticket->getUsers();//Listado de usuario
+			foreach ( $user as $names ){//Recorrido de usuarios
+				$asigned = ($row->Usuario2Id == $names->UsuarioId)?'Estimado/a '.$names->UsuarioNombre.',':'';
+			}
+			$msgEmail = 'Le notificamos el ticket #'.$row->TicketId.' se ha re-aperturado.';
+			
+			$ticket->sendMail($row->TicketTitulo,$msgEmail,$row->Usuario2Id,$msgEmail);
+			
 			if (!empty($ticket->message)) $contentMessage = $ticket->message;
 			$typeMessage = $ticket->type;
 		}else{
@@ -317,6 +343,23 @@
 		$_POST['id'] = encode('decrypt',$_POST['id']);
 		if( $ticket->validCommen($_POST) ){
 			$contentMessage = 'La respuesta se ha agregado correctamente';
+			//Content message email	######
+			$row = $ticket->getTicketById($_POST['id']);
+			$user = $ticket->getUsers();//Listado de usuario
+			if($_POST['user'] == $row->Usuario2Id){//Si id es igual a Id usuario asignado
+				foreach ( $user as $names ){//Recorrido de usuarios
+					$asigned = ($row->UsuarioId == $names->UsuarioId)?'Estimado/a '.$names->UsuarioNombre.',':'';
+					$sender = $row->UsuarioId;
+				}
+			}else{
+				foreach ( $user as $names ){//Recorrido de usuarios
+					$asigned = ($row->Usuario2Id == $names->UsuarioId)?'Estimado/a '.$names->UsuarioNombre.',':'';
+					$sender = $row->Usuario2Id;
+				}
+			}
+			//End content message email	###
+			$ticket->sendMail($row->TicketTitulo,$asigned,$sender,$_POST['comment']);
+			
 			if (!empty($ticket->message)) $contentMessage = $ticket->message;
 			$typeMessage = $ticket->type;
 		}else{
